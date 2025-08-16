@@ -498,7 +498,7 @@
             data.pii.forEach((p) => {
               html += `<li>
                 <div class="pii-type">${p.type}</div>
-                <div class="pii-value">${p.value}</div>
+                <div class="pii-value">${p.masked ? p.masked : p.value}</div>
                 ${
                   p.confidence
                     ? `<div class="confidence">Confidence: ${p.confidence}</div>`
