@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>PII Detection Pro</title>
+    <meta name="viewport" content="width=350, initial-scale=1.0" />
+    <style>
+      body {
+        background: #003366;
+        min-width: 320px;
+        min-height: 320px;
+        font-family: "Segoe UI", Arial, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px 0 rgba(0, 51, 102, 0.15);
+        padding: 1.2em 1em 1em 1em;
+        max-width: 320px;
+        width: 100%;
+        text-align: center;
+      }
+      h1 {
+        margin-bottom: 1.2rem;
+        color: #003366;
+        font-size: 1.3rem;
+        font-weight: 800;
+        letter-spacing: -1px;
+      }
+      .form-group {
+        margin-bottom: 1.1rem;
+        text-align: left;
+      }
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #003366;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      select,
+      input[type="file"] {
+        width: 100%;
+        padding: 0.5em;
+        border-radius: 8px;
+        border: 1.5px solid #003366;
+        background: #f4f8fb;
+        color: #003366;
+        font-size: 1em;
+        margin-bottom: 0.5em;
+      }
+      button {
+        background: #003366;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.6em 1.2em;
+        font-size: 1em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-bottom: 1em;
+        width: 100%;
+      }
+      button:hover {
+        background: #00509e;
+      }
+      .result {
+        margin-top: 1em;
+        text-align: left;
+        font-size: 0.98em;
+      }
+      .result h2 {
+        color: #003366;
+        margin-bottom: 0.7em;
+        font-size: 1.1em;
+        font-weight: 700;
+      }
+      .result ul {
+        padding-left: 1.2em;
+        margin: 0 0 1em 0;
+      }
+      .result li {
+        background: #f4f8fb;
+        border: 1px solid #e0e7ef;
+        border-radius: 8px;
+        padding: 0.7em;
+        margin-bottom: 0.5em;
+      }
+      .pii-type {
+        color: #003366;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.9em;
+      }
+      .pii-value {
+        color: #222;
+        margin: 0.3em 0;
+        font-size: 1em;
+      }
+      .confidence {
+        color: #888;
+        font-size: 0.85em;
+        font-style: italic;
+      }
+      .needed {
+        color: #00b86b;
+        font-weight: 700;
+      }
+      .not-needed {
+        color: #ff6b6b;
+        font-weight: 700;
+      }
+      .error {
+        color: #ff6b6b;
+        background: #fff0f0;
+        border: 1px solid #ffd2d2;
+        border-radius: 10px;
+        padding: 1em;
+        margin-top: 1em;
+        text-align: center;
+      }
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #003366;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        animation: spin 1s linear infinite;
+        margin: 1em auto;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .loading-text {
+        color: #003366;
+        text-align: center;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-top: 0.5em;
+      }
+    </style>
+    <script src="popup.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>PII Detection Pro</h1>
+      <form id="uploadForm">
+        <div class="form-group">
+          <label for="service_type">Service Type</label>
+          <select name="service_type" id="service_type">
+            <option value="default">Default</option>
+            <option value="library_membership">Library Membership</option>
+            <option value="job_application">Job Application</option>
+            <option value="loan_application">Loan Application</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="file">Upload File</label>
+          <input type="file" name="file" id="file" required />
+        </div>
+        <button type="submit" class="btn-submit">Analyze Document</button>
+      </form>
+      <div class="result" id="result"></div>
+    </div>
+  </body>
+</html>

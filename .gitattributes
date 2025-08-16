@@ -1,0 +1,16 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Force Unix-style LF for all text files
+*.txt text eol=lf
+*.md text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.py text eol=lf
+
+# Force binary files to be treated as binary
+*.zip binary
+*.exe binary
+*.jar binary
+*.ttf binary
+*.png binary

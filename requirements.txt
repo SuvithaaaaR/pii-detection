@@ -1,0 +1,6 @@
+Flask
+pytesseract
+Pillow
+spacy
+pyyaml
+pdfplumber
