@@ -27,11 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
       let html = "<h2>Detected PII</h2><ul>";
       if (data.pii && data.pii.length > 0) {
         data.pii.forEach((p) => {
-          html += `<li>\n                <div class=\"pii-type\">${
-            p.type
-          }</div>\n                <div class=\"pii-value\">${
-            p.value
-          }</div>\n                ${
+          html += `<li>\n                <div class=\"pii-type\">${p.type}</div>\n                <div class=\"pii-value\">${p.masked ? p.masked : p.value}</div>\n                ${
             p.confidence
               ? `<div class=\"confidence\">Confidence: ${p.confidence}</div>`
               : ""
@@ -60,9 +56,35 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       html += "</ul>";
       document.getElementById("result").innerHTML = html;
+      document.getElementById("downloadMaskedBtn").style.display = "block";
     } catch (err) {
       document.getElementById("result").innerHTML =
         '<div class="error">❌ Error: ' + err.message + "</div>";
     }
   });
+
+  // Download masked file logic
+  document.getElementById("downloadMaskedBtn").onclick = async function () {
+    const fileInput = document.getElementById("file");
+    if (!fileInput.files[0]) return;
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+    const res = await fetch("http://127.0.0.1:5000/download-masked", {
+      method: "POST",
+      body: formData,
+    });
+    if (!res.ok) {
+      alert("Failed to download masked file.");
+      return;
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "masked.txt";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  };
 });
