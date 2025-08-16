@@ -4,7 +4,7 @@ import spacy
 nlp = spacy.blank('en')
 
 PII_PATTERNS = {
-    'aadhaar': r'\b\d{4}-\d{4}-\d{4}\b',
+    'aadhaar': r'\b\d{4}[- ]\d{4}[- ]\d{4}\b',
     'pan': r'\b[A-Z]{5}\d{4}[A-Z]\b',
     'dob': r'\b\d{2}/\d{2}/\d{4}\b',
     'email': r'\b[\w.-]+@[\w.-]+\.\w+\b',
@@ -30,8 +30,20 @@ def mask_value(value, pii_type):
 
 def detect_pii(text):
     results = []
+    norm_text = re.sub(r'[\n\r\t]+', ' ', text)  # Normalize whitespace
     for label, pattern in PII_PATTERNS.items():
         for match in re.finditer(pattern, text):
+            # Improved DOB detection: flexible context check for OCR variations
+            if label == 'dob':
+                norm_match = re.search(re.escape(match.group()), norm_text)
+                if norm_match:
+                    start = max(0, norm_match.start() - 50)
+                    context = norm_text[start:norm_match.start()].lower()
+                    # Flexible context: allow spaces, colons, and ignore case
+                    if 'print date' in context:
+                        continue
+                    if not re.search(r'dob|d\.o\.b|date\s*:?\s*of\s*:?\s*birth', context):
+                        continue
             masked = mask_value(match.group(), label)
             results.append({'type': label, 'value': match.group(), 'masked': masked, 'confidence': 0.99})
     # Use spaCy for names (very basic)

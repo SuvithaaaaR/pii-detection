@@ -43,5 +43,19 @@ def redact_file():
     # For demo, just return a success message
     return jsonify({'status': 'redacted', 'pii_redacted': pii_to_redact})
 
+@app.route('/download-masked', methods=['POST'])
+def download_masked():
+    file = request.files['file']
+    text = extract_text_from_file(file)
+    pii_list = detect_pii(text)
+    masked_text = text
+    for pii in pii_list:
+        masked_text = masked_text.replace(pii['value'], pii['masked'])
+    # Return as downloadable text file
+    return (masked_text, 200, {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Content-Disposition': 'attachment; filename="masked.txt"'
+    })
+
 if __name__ == '__main__':
     app.run(debug=True)

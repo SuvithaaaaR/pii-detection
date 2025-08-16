@@ -465,6 +465,14 @@
         <button type="submit" class="btn-submit">Analyze Document</button>
       </form>
       <div class="result" id="result"></div>
+      <button
+        id="downloadMaskedBtn"
+        style="display: none; margin-top: 1rem"
+        class="btn-submit"
+        type="button"
+      >
+        Download Masked File
+      </button>
     </div>
 
     <script>
@@ -474,34 +482,31 @@
       document.getElementById("uploadForm").onsubmit = async function (e) {
         e.preventDefault();
         const formData = new FormData();
-        formData.append("file", document.getElementById("file").files[0]);
+        const fileInput = document.getElementById("file");
+        formData.append("file", fileInput.files[0]);
         formData.append(
           "service_type",
           document.getElementById("service_type").value
         );
-
         document.getElementById("result").innerHTML =
           '<div class="loader"></div><div class="loading-text">Analyzing document for PII...</div>';
-
+        document.getElementById("downloadMaskedBtn").style.display = "none";
         try {
           const res = await fetch("http://localhost:5000/upload", {
             method: "POST",
             body: formData,
           });
-
           if (!res.ok) throw new Error("Server error: " + res.status);
-
           const data = await res.json();
           let html = "<h2>Detected PII</h2><ul>";
-
           if (data.pii && data.pii.length > 0) {
             data.pii.forEach((p) => {
               html += `<li>
-                <div class="pii-type">${p.type}</div>
-                <div class="pii-value">${p.masked ? p.masked : p.value}</div>
+                <div class=\"pii-type\">${p.type}</div>
+                <div class=\"pii-value\">${p.masked ? p.masked : p.value}</div>
                 ${
                   p.confidence
-                    ? `<div class="confidence">Confidence: ${p.confidence}</div>`
+                    ? `<div class=\"confidence\">Confidence: ${p.confidence}</div>`
                     : ""
                 }
               </li>`;
@@ -510,15 +515,13 @@
             html +=
               '<li><div class="pii-value">No PII detected in this document.</div></li>';
           }
-
           html += "</ul><h2>Data Necessity</h2><ul>";
-
           if (data.necessity && data.necessity.length > 0) {
             data.necessity.forEach((n) => {
               html += `<li>
-                <div class="pii-type">${n.type}</div>
-                <div class="pii-value">${n.value}</div>
-                <div class="${n.needed ? "needed" : "not-needed"}">${
+                <div class=\"pii-type\">${n.type}</div>
+                <div class=\"pii-value\">${n.value}</div>
+                <div class=\"${n.needed ? "needed" : "not-needed"}\">${
                 n.needed ? "✓ Required" : "✗ Not Required"
               }</div>
               </li>`;
@@ -527,13 +530,37 @@
             html +=
               '<li><div class="pii-value">No necessity information available.</div></li>';
           }
-
           html += "</ul>";
           document.getElementById("result").innerHTML = html;
+          document.getElementById("downloadMaskedBtn").style.display = "block";
         } catch (err) {
           document.getElementById("result").innerHTML =
             '<div class="error">❌ Error: ' + err.message + "</div>";
         }
+      };
+      // Download masked file logic
+      document.getElementById("downloadMaskedBtn").onclick = async function () {
+        const fileInput = document.getElementById("file");
+        if (!fileInput.files[0]) return;
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+        const res = await fetch("http://localhost:5000/download-masked", {
+          method: "POST",
+          body: formData,
+        });
+        if (!res.ok) {
+          alert("Failed to download masked file.");
+          return;
+        }
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "masked.txt";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
       };
     </script>
   </body>
