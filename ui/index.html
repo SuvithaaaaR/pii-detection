@@ -14,7 +14,8 @@
       body {
         background: #003366;
         min-height: 100vh;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, sans-serif;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -99,8 +100,12 @@
       }
 
       @keyframes rotate {
-        0% { transform: translate(-50%, -50%) rotate(0deg); }
-        100% { transform: translate(-50%, -50%) rotate(360deg); }
+        0% {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+        100% {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
       }
 
       .container {
@@ -108,8 +113,7 @@
         backdrop-filter: blur(20px);
         border: 2px solid rgba(102, 153, 255, 0.3);
         border-radius: 24px;
-        box-shadow: 
-          0 25px 45px rgba(0, 0, 0, 0.4),
+        box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4),
           inset 0 1px 0 rgba(102, 153, 255, 0.2),
           0 0 50px rgba(0, 204, 255, 0.1);
         padding: 3rem 2.5rem;
@@ -122,13 +126,13 @@
       }
 
       @keyframes slideUp {
-        from { 
-          opacity: 0; 
-          transform: translateY(50px); 
+        from {
+          opacity: 0;
+          transform: translateY(50px);
         }
-        to { 
-          opacity: 1; 
-          transform: translateY(0); 
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
       }
 
@@ -139,7 +143,12 @@
         font-weight: 800;
         letter-spacing: -1px;
         text-shadow: 0 2px 20px rgba(0, 204, 255, 0.5);
-        background: linear-gradient(135deg, #00ccff 0%, #0099ff 50%, #66b3ff 100%);
+        background: linear-gradient(
+          135deg,
+          #00ccff 0%,
+          #0099ff 50%,
+          #66b3ff 100%
+        );
         background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -223,13 +232,18 @@
       }
 
       .btn-submit:before {
-        content: '';
+        content: "";
         position: absolute;
         top: 0;
         left: -100%;
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(0, 204, 255, 0.3), transparent);
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 204, 255, 0.3),
+          transparent
+        );
         transition: left 0.5s;
       }
 
@@ -257,8 +271,14 @@
       }
 
       @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       .result h2 {
@@ -272,7 +292,7 @@
       }
 
       .result h2:before {
-        content: '🔍';
+        content: "🔍";
         font-size: 1.2rem;
       }
 
@@ -301,7 +321,7 @@
       }
 
       .result li:before {
-        content: '';
+        content: "";
         position: absolute;
         left: 0;
         top: 0;
@@ -353,9 +373,16 @@
       }
 
       @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-5px); }
-        75% { transform: translateX(5px); }
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
       }
 
       .loader {
@@ -369,8 +396,12 @@
       }
 
       @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
 
       .loading-text {
@@ -382,8 +413,13 @@
       }
 
       @keyframes pulse {
-        0%, 100% { opacity: 0.6; }
-        50% { opacity: 1; }
+        0%,
+        100% {
+          opacity: 0.6;
+        }
+        50% {
+          opacity: 1;
+        }
       }
 
       /* Responsive design */
@@ -407,7 +443,7 @@
       <div class="spiral"></div>
       <div class="spiral"></div>
     </div>
-    
+
     <div class="container">
       <h1>PII Detection Pro</h1>
       <form id="uploadForm">
@@ -420,12 +456,12 @@
             <option value="loan_application">Loan Application</option>
           </select>
         </div>
-        
+
         <div class="form-group">
           <label for="file">Upload File</label>
           <input type="file" name="file" id="file" required />
         </div>
-        
+
         <button type="submit" class="btn-submit">Analyze Document</button>
       </form>
       <div class="result" id="result"></div>
@@ -439,48 +475,59 @@
         e.preventDefault();
         const formData = new FormData();
         formData.append("file", document.getElementById("file").files[0]);
-        formData.append("service_type", document.getElementById("service_type").value);
-        
+        formData.append(
+          "service_type",
+          document.getElementById("service_type").value
+        );
+
         document.getElementById("result").innerHTML =
           '<div class="loader"></div><div class="loading-text">Analyzing document for PII...</div>';
-        
+
         try {
           const res = await fetch("http://localhost:5000/upload", {
             method: "POST",
             body: formData,
           });
-          
+
           if (!res.ok) throw new Error("Server error: " + res.status);
-          
+
           const data = await res.json();
           let html = "<h2>Detected PII</h2><ul>";
-          
+
           if (data.pii && data.pii.length > 0) {
             data.pii.forEach((p) => {
               html += `<li>
                 <div class="pii-type">${p.type}</div>
                 <div class="pii-value">${p.value}</div>
-                ${p.confidence ? `<div class="confidence">Confidence: ${p.confidence}</div>` : ''}
+                ${
+                  p.confidence
+                    ? `<div class="confidence">Confidence: ${p.confidence}</div>`
+                    : ""
+                }
               </li>`;
             });
           } else {
-            html += '<li><div class="pii-value">No PII detected in this document.</div></li>';
+            html +=
+              '<li><div class="pii-value">No PII detected in this document.</div></li>';
           }
-          
+
           html += "</ul><h2>Data Necessity</h2><ul>";
-          
+
           if (data.necessity && data.necessity.length > 0) {
             data.necessity.forEach((n) => {
               html += `<li>
                 <div class="pii-type">${n.type}</div>
                 <div class="pii-value">${n.value}</div>
-                <div class="${n.needed ? 'needed' : 'not-needed'}">${n.needed ? '✓ Required' : '✗ Not Required'}</div>
+                <div class="${n.needed ? "needed" : "not-needed"}">${
+                n.needed ? "✓ Required" : "✗ Not Required"
+              }</div>
               </li>`;
             });
           } else {
-            html += '<li><div class="pii-value">No necessity information available.</div></li>';
+            html +=
+              '<li><div class="pii-value">No necessity information available.</div></li>';
           }
-          
+
           html += "</ul>";
           document.getElementById("result").innerHTML = html;
         } catch (err) {
