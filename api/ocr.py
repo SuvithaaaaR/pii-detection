@@ -2,6 +2,11 @@ import pytesseract
 from PIL import Image
 import io
 import pdfplumber
+# Add docx support
+try:
+    from docx import Document
+except ImportError:
+    Document = None
 
 def extract_text_from_file(file):
     filename = file.filename.lower()
@@ -12,6 +17,14 @@ def extract_text_from_file(file):
             text = ''
             for page in pdf.pages:
                 text += page.extract_text() or ''
+        return text
+    # For DOCX files
+    if filename.endswith('.docx'):
+        if Document is None:
+            raise ImportError('python-docx is not installed. Please install it with pip install python-docx')
+        file.stream.seek(0)
+        doc = Document(file.stream)
+        text = '\n'.join([para.text for para in doc.paragraphs])
         return text
     # For images
     try:

@@ -1,13 +1,18 @@
 # Example service rules for necessity analysis
 library_membership:
-  - name
-  - address
+  required:
+    - name
+    - address
+  exceptions:
+    - pan
 job_application:
-  - name
-  - address
-  - dob
+  required:
+    - name
+    - address
+    - dob
 loan_application:
-  - pan
-  - name
-  - address
-  - dob
+  required:
+    - pan
+    - name
+    - address
+    - dob
