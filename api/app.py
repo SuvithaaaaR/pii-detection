@@ -6,6 +6,7 @@ from redaction import redact_pii
 from flask_cors import CORS
 import threading
 import os
+import re
 
 app = Flask(__name__)
 CORS(app)
@@ -24,14 +25,24 @@ def detect_pii_background(text, pii_list_holder):
 @app.route('/upload', methods=['POST'])
 def upload_file():
     file = request.files['file']
+    # Get website_link and service_type from form
+    website_link = request.form.get('website_link', '').strip()
     service_type = request.form.get('service_type', 'default')
+    # Use website_link domain as service_type if provided
+    domain = ''
+    if website_link:
+        match = re.search(r'https?://([^/]+)', website_link)
+        if match:
+            domain = match.group(1).lower().replace('www.', '')
+    # Prefer domain as service_type if present, else fallback
+    effective_service_type = domain if domain else service_type
     text = extract_text_from_file(file)
     pii_list_holder = []
     thread = threading.Thread(target=detect_pii_background, args=(text, pii_list_holder))
     thread.start()
     thread.join()  # For demo: wait for background to finish (remove for true async)
     pii_list = pii_list_holder[0] if pii_list_holder else []
-    necessity = check_necessity(pii_list, service_type)
+    necessity = check_necessity(pii_list, effective_service_type)
     print("Returning response:", {'pii': pii_list, 'necessity': necessity})
     return jsonify({'pii': pii_list, 'necessity': necessity})
 

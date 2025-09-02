@@ -4,17 +4,12 @@ document.addEventListener("DOMContentLoaded", function () {
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
     const fileInput = document.getElementById("file");
-    if (!fileInput.files || fileInput.files.length === 0) {
-      document.getElementById("result").innerHTML =
-        '<div class="error">Please select a file to analyze.</div>';
-      return;
-    }
+    const serviceType = document.getElementById("service_type").value;
+    const websiteLink = document.getElementById("website_link").value;
     const formData = new FormData();
     formData.append("file", fileInput.files[0]);
-    formData.append(
-      "service_type",
-      document.getElementById("service_type").value
-    );
+    formData.append("service_type", serviceType);
+    formData.append("website_link", websiteLink);
     document.getElementById("result").innerHTML =
       '<div class="loader"></div><div class="loading-text">Analyzing document for PII...</div>';
     try {
@@ -27,7 +22,11 @@ document.addEventListener("DOMContentLoaded", function () {
       let html = "<h2>Detected PII</h2><ul>";
       if (data.pii && data.pii.length > 0) {
         data.pii.forEach((p) => {
-          html += `<li>\n                <div class=\"pii-type\">${p.type}</div>\n                <div class=\"pii-value\">${p.masked ? p.masked : p.value}</div>\n                ${
+          html += `<li>\n                <div class=\"pii-type\">${
+            p.type
+          }</div>\n                <div class=\"pii-value\">${
+            p.masked ? p.masked : p.value
+          }</div>\n                ${
             p.confidence
               ? `<div class=\"confidence\">Confidence: ${p.confidence}</div>`
               : ""

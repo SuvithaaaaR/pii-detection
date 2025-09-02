@@ -16,12 +16,29 @@ ner_model = AutoModelForTokenClassification.from_pretrained(NER_MODEL)
 ner_pipeline = pipeline('ner', model=ner_model, tokenizer=ner_tokenizer, aggregation_strategy="simple")
 
 PII_PATTERNS = {
-    'aadhaar': r'\b\d{4}[- ]\d{4}[- ]\d{4}\b',
-    'pan': r'\b[A-Z]{5}\d{4}[A-Z]\b',
-    'dob': r'\b\d{2}/\d{2}/\d{4}\b',
-    'email': r'\b[\w.-]+@[\w.-]+\.\w+\b',
-    'phone': r'\b(?:\d{10}|\d{3}[- ]\d{3}[- ]\d{4}|\d{3} \d{3} \d{4})\b',
+    # Aadhaar: labeled and label-free (12 digits, allow spaces or dashes)
+    'aadhaar': r'(?i)(aadhaar( no| number)?\s*[:\-]?\s*)?(\d{4}[- ]\d{4}[- ]\d{4})',
+    # PAN: labeled only
+    'pan': r'(?i)(pan\s*[:\-]?\s*)([A-Z]{5}\d{4}[A-Z])',
+    # DOB: labeled and label-free (dd/mm/yyyy)
+    'dob': r'(?i)(dob|date of birth)?\s*[:\-]?\s*(\d{2}/\d{2}/\d{4})',
+    'email': r'(?i)(email\s*[:\-]?\s*)([\w.-]+@[\w.-]+\.\w+)',
+    'phone': r'(?i)(phone\s*[:\-]?\s*)(\d{10}|\d{3}[- ]\d{3}[- ]\d{4}|\d{3} \d{3} \d{4})',
+    'name': r'(?i)((name|s/o|d/o|w/o|c/o)\s*[:\-]?\s*)([A-Z][a-z]+( [A-Z][a-z]+)+)',
+    'certificate_no': r'(?i)(certificate no\s*[:\-]?\s*)([A-Z]{2}-\d{12})',
+    'application_no': r'(?i)(application no\s*[:\-]?\s*)([A-Z0-9\-]{8,20})',
+    'voter_id': r'(?i)(voter id\s*[:\-]?\s*)([A-Z]{3}[0-9]{7})',
+    'passport': r'(?i)(passport( no| number)?\s*[:\-]?\s*)([A-Z][0-9]{7})',
+    'driving_license': r'(?i)(driving license( no| number)?\s*[:\-]?\s*)([A-Z]{2}[0-9]{13})',
+    'ifsc': r'(?i)(ifsc\s*[:\-]?\s*)([A-Z]{4}0[A-Z0-9]{6})',
+    'account_no': r'(?i)(account( no| number)?\s*[:\-]?\s*)([0-9]{9,18})',
+    'student_id': r'(?i)(student id\s*[:\-]?\s*)([A-Z0-9\-]{6,20})',
 }
+
+# List of official/government email domains to ignore as PII
+OFFICIAL_EMAIL_DOMAINS = [
+    '@uidai.gov.in', '@gov.in', '@nic.in', '@india.gov.in', '@mygov.in', '@aadhaarindia.gov.in'
+]
 
 def mask_value(value, pii_type):
     if pii_type == 'aadhaar':
@@ -49,9 +66,26 @@ def detect_pii(text):
     print("[DEBUG] OCR Extracted Text:\n", text)  # Debug: print OCR output
     results = []
     norm_text = re.sub(r'[\n\r\t]+', ' ', text)  # Normalize whitespace
-    # Regex-based detection (for Aadhaar, PAN, email, phone, DOB)
+    # Regex-based detection (for Aadhaar, PAN, email, phone, DOB, NAME, etc.)
     for label, pattern in PII_PATTERNS.items():
         for match in re.finditer(pattern, text):
+            value = match.groups()[-1] if hasattr(match, 'groups') and match.groups() else match.group()
+            # Aadhaar context filter: skip if 'print date' or 'prnt date' nearby
+            if label == 'aadhaar':
+                start = max(0, match.start() - 50)
+                context = text[start:match.start()].lower()
+                if 'print date' in context or 'prnt date' in context:
+                    continue
+            # DOB context filter: skip if 'print date' or 'prnt date' nearby
+            if label == 'dob':
+                start = max(0, match.start() - 50)
+                context = text[start:match.start()].lower()
+                if 'print date' in context or 'prnt date' in context:
+                    continue
+            # Filter out official/government emails
+            if label == 'email':
+                if any(value.lower().endswith(domain) for domain in OFFICIAL_EMAIL_DOMAINS):
+                    continue
             # Improved DOB detection: flexible context check for OCR variations
             if label == 'dob':
                 norm_match = re.search(re.escape(match.group()), norm_text)
@@ -64,7 +98,8 @@ def detect_pii(text):
                     if not re.search(r'dob|d\\.o\\.b|date\\s*:?\\s*of\\s*:?\\s*birth', context):
                         continue
             masked = mask_value(match.group(), label)
-            results.append({'type': label, 'value': match.group(), 'masked': masked, 'confidence': 0.99})
+            if not any(r['value'] == value and r['type'] == label for r in results):
+                results.append({'type': label, 'value': value, 'masked': masked, 'confidence': 0.99})
     # Transformer-based NER for general entities (PERSON, LOCATION)
     ner_results = ner_pipeline(text)
     for ent in ner_results:

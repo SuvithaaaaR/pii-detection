@@ -9,7 +9,8 @@ def load_rules():
 
 def check_necessity(pii_list, service_type):
     rules = load_rules()
-    service_rules = rules.get(service_type, {})
+    # Use default if service_type not found
+    service_rules = rules.get(service_type, rules.get('default', {}))
     required = service_rules.get('required', [])
     exceptions = service_rules.get('exceptions', [])
     result = []

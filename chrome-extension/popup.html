@@ -46,7 +46,8 @@
         letter-spacing: 0.5px;
       }
       select,
-      input[type="file"] {
+      input[type="file"],
+      input[type="url"] {
         width: 100%;
         padding: 0.5em;
         border-radius: 8px;
@@ -159,6 +160,16 @@
       <h1>PII Detection Pro</h1>
       <form id="uploadForm">
         <div class="form-group">
+          <label for="website_link">Website Link</label>
+          <input
+            type="url"
+            name="website_link"
+            id="website_link"
+            placeholder="https://example.com"
+            style="margin-bottom: 0.5em"
+          />
+        </div>
+        <div class="form-group">
           <label for="service_type">Service Type</label>
           <select name="service_type" id="service_type">
             <option value="default">Default</option>
@@ -174,7 +185,14 @@
         <button type="submit" class="btn-submit">Analyze Document</button>
       </form>
       <div class="result" id="result"></div>
-      <button id="downloadMaskedBtn" style="display:none;margin-top:1em;width:100%;" class="btn-submit" type="button">Download Masked File</button>
+      <button
+        id="downloadMaskedBtn"
+        style="display: none; margin-top: 1em; width: 100%"
+        class="btn-submit"
+        type="button"
+      >
+        Download Masked File
+      </button>
     </div>
   </body>
 </html>

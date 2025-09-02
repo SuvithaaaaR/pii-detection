@@ -16,3 +16,65 @@ loan_application:
     - name
     - address
     - dob
+uidai.gov.in:
+  required:
+    - aadhaar
+    - dob
+    - name
+  exceptions: []
+incometax.gov.in:
+  required:
+    - pan
+    - name
+    - dob
+  exceptions: []
+passportindia.gov.in:
+  required:
+    - passport
+    - name
+    - dob
+  exceptions: []
+bank_account_opening:
+  required:
+    - name
+    - address
+    - dob
+    - pan
+    - aadhaar
+    - phone
+  exceptions: []
+university_admission:
+  required:
+    - name
+    - dob
+    - address
+    - email
+    - student_id
+  exceptions: []
+driving_license_application:
+  required:
+    - name
+    - dob
+    - address
+    - driving_license
+    - phone
+  exceptions: []
+voter_registration:
+  required:
+    - name
+    - dob
+    - address
+    - voter_id
+  exceptions: []
+insurance_policy:
+  required:
+    - name
+    - dob
+    - address
+    - pan
+    - phone
+    - email
+  exceptions: []
+default:
+  required: []
+  exceptions: []
